@@ -22,15 +22,9 @@ HTML/CSS/JS – for the frontend UI and interaction
 
 How to Run
 Install Flask and pandas:
-
-bash
-Copy
-Edit
 pip install flask pandas
-Run the app:
 
-bash
-Copy
-Edit
+Run the app:
 python app.py
+
 Open http://localhost:5000 in your browser
