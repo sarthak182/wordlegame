@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wordle</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .congrats {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      #replay {
+        width: 120px; /* Adjust width */
+        height: 55px; /* Adjust height */
+        margin-top: 6px;
+        border: 2px solid #ccc;
+        background-color: white;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 6.5%;
+        text-transform: uppercase;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.15s ease, transform 0.1s ease-in-out;
+        cursor: pointer;
+      }
+
+      #replay:hover {
+        background-color: rgba(
+          224,
+          224,
+          224,
+          0.8
+        ); /* Hover effect similar to grey shades */
+        transform: scale(1.005); /* Slight pop effect */
+      }
+
+      #replay:active {
+        background-color: rgba(224, 224, 224, 1); /* Darker grey on click */
+        transform: scale(1);
+      }
+      .message {
+        font-size: 2.5rem; /* Adjust size */
+        font-weight: bold; /* Make it bold */
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="congrats">
+      <span class="message"> You won!</span><button id="replay">REPLAY</button>
+    </div>
+    <script>
+      document.getElementById("replay").addEventListener("click", function () {
+        window.location.href = "/"; // Redirect to the game page (index.html)
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Classic Mode - Wordle</title>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='cupboard_1.png') }}"
+      type="image/png"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        height: 100vh;
+        margin: 0;
+        padding-top: 20px;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 60px); /* 5 columns */
+        grid-template-rows: repeat(6, 60px); /* 6 rows */
+        gap: 13px;
+      }
+      .hint-button {
+        display: block;
+        margin: 20px auto; /* Adds spacing and centers the button */
+        padding: 10px 15px;
+        font-size: 16px;
+        border: none;
+        background-color: #f1c40f;
+        color: black;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out,
+          transform 0.2s ease-in-out;
+      }
+
+      .hint-button:hover {
+        background-color: #e4c30b;
+      }
+
+      .box {
+        width: 60px;
+        height: 60px;
+        border: 2px solid #ccc;
+        background-color: white;
+        text-align: center;
+        line-height: 60px;
+        font-size: 24px;
+        font-weight: bold;
+        border-radius: 15%;
+        text-transform: uppercase;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.325s ease; /* Smooth color transition */
+        .box.grey-1 {
+          background-color: rgba(224, 224, 224, 0.2); /* 1/5 grey */
+        }
+
+        .box.grey-2 {
+          background-color: rgba(224, 224, 224, 0.4); /* 2/5 grey */
+        }
+
+        .box.grey-3 {
+          background-color: rgba(224, 224, 224, 0.6); /* 3/5 grey */
+        }
+
+        .box.grey-4 {
+          background-color: rgba(224, 224, 224, 0.8); /* 4/5 grey */
+        }
+
+        .box.grey-5 {
+          background-color: rgba(224, 224, 224, 1); /* 5/5 grey */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Classic Mode</h1>
+    <div class="grid">
+      <!-- 6 rows, each with 5 boxes for letters -->
+      <!-- Row 1 -->
+      <div class="box" data-row="0" data-col="0"></div>
+      <div class="box" data-row="0" data-col="1"></div>
+      <div class="box" data-row="0" data-col="2"></div>
+      <div class="box" data-row="0" data-col="3"></div>
+      <div class="box" data-row="0" data-col="4"></div>
+      <!-- Row 2 -->
+      <div class="box" data-row="1" data-col="0"></div>
+      <div class="box" data-row="1" data-col="1"></div>
+      <div class="box" data-row="1" data-col="2"></div>
+      <div class="box" data-row="1" data-col="3"></div>
+      <div class="box" data-row="1" data-col="4"></div>
+      <!-- Row 3 -->
+      <div class="box" data-row="2" data-col="0"></div>
+      <div class="box" data-row="2" data-col="1"></div>
+      <div class="box" data-row="2" data-col="2"></div>
+      <div class="box" data-row="2" data-col="3"></div>
+      <div class="box" data-row="2" data-col="4"></div>
+      <!-- Row 4 -->
+      <div class="box" data-row="3" data-col="0"></div>
+      <div class="box" data-row="3" data-col="1"></div>
+      <div class="box" data-row="3" data-col="2"></div>
+      <div class="box" data-row="3" data-col="3"></div>
+      <div class="box" data-row="3" data-col="4"></div>
+      <!-- Row 5 -->
+      <div class="box" data-row="4" data-col="0"></div>
+      <div class="box" data-row="4" data-col="1"></div>
+      <div class="box" data-row="4" data-col="2"></div>
+      <div class="box" data-row="4" data-col="3"></div>
+      <div class="box" data-row="4" data-col="4"></div>
+      <!-- Row 6 -->
+      <div class="box" data-row="5" data-col="0"></div>
+      <div class="box" data-row="5" data-col="1"></div>
+      <div class="box" data-row="5" data-col="2"></div>
+      <div class="box" data-row="5" data-col="3"></div>
+      <div class="box" data-row="5" data-col="4"></div>
+    </div>
+    <h1 id="word-heading" style="display: none">Word Definition:</h1>
+    <p id="word-definition" style="display: none">
+      Your word's meaning will appear here.
+    </p>
+
+    <button class="hint-button" onclick="showDefinition()">💡Hint</button>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        function showDefinition() {
+          document.getElementById("word-heading").style.display = "block";
+          document.getElementById("word-definition").style.display = "block";
+          document.getElementById("word-definition").innerText = defini;
+          document.querySelector(".hint-button").style.display = "none";
+        }
+        document
+          .querySelector(".hint-button")
+          .addEventListener("click", showDefinition);
+        const boxes = document.querySelectorAll(".box");
+        let currentRow = 0; // Start at the first row
+        const submittedRows = new Set(); // Track submitted rows
+
+        document.addEventListener("keydown", (event) => {
+          const key = event.key.toUpperCase(); // Convert key to uppercase
+
+          // Prevent any input or backspacing if the row is submitted
+          if (submittedRows.has(currentRow)) {
+            if (key === "Backspace" || /[A-Z]/.test(key)) {
+              return;
+            }
+          }
+
+          if (key.length === 1 && /[A-Z]/.test(key)) {
+            // Check if it's a letter
+            const boxesInCurrentRow = Array.from(boxes).filter(
+              (box) => box.getAttribute("data-row") === currentRow.toString()
+            );
+
+            // Find the first empty box in the current row
+            const emptyBox = boxesInCurrentRow.find((box) => !box.textContent);
+
+            if (emptyBox) {
+              emptyBox.textContent = key;
+
+              // Move to the next box if there are more in the row
+              const nextBox = boxesInCurrentRow.find(
+                (box) => box === emptyBox.nextElementSibling
+              );
+              if (nextBox) {
+                nextBox.focus();
+              } else {
+                // Check if the current row is fully filled
+                const isRowFilled = !boxesInCurrentRow.some(
+                  (box) => !box.textContent
+                );
+
+                if (isRowFilled) {
+                  // Highlight the row as filled (only if it's not submitted yet)
+                  boxesInCurrentRow.forEach(
+                    (box) => (box.style.backgroundColor = "#f0f0f0")
+                  );
+                }
+              }
+            }
+          } else if (event.key === "Backspace") {
+            if (currentRow === 4 && submittedRows.has(currentRow)) {
+              // Prevent backspacing in the last row if it's already submitted
+              return;
+            }
+
+            const boxesInCurrentRow = Array.from(boxes).filter(
+              (box) => box.getAttribute("data-row") === currentRow.toString()
+            );
+
+            // Find the last non-empty box in the current row
+            const filledBoxes = boxesInCurrentRow.filter(
+              (box) => box.textContent
+            );
+            const lastFilledBox = filledBoxes[filledBoxes.length - 1];
+
+            if (lastFilledBox) {
+              lastFilledBox.textContent = "";
+              lastFilledBox.focus();
+
+              // Reset the background color of the row if it's not fully filled
+              const isRowFilled = !boxesInCurrentRow.some(
+                (box) => !box.textContent
+              );
+
+              if (!isRowFilled) {
+                boxesInCurrentRow.forEach(
+                  (box) => (box.style.backgroundColor = "white")
+                );
+              }
+            }
+          } else if (event.key === "Enter") {
+            // Get all boxes in the current row
+            const boxesInCurrentRow = Array.from(boxes).filter(
+              (box) => box.getAttribute("data-row") === currentRow.toString()
+            );
+
+            // Check if the current row is completely filled
+            const isRowFilled = !boxesInCurrentRow.some(
+              (box) => !box.textContent
+            );
+
+            if (isRowFilled) {
+              // Capture and send the word to Python
+              const word = boxesInCurrentRow
+                .map((box) => box.textContent)
+                .join("");
+
+              // Validate the word first
+              fetch("/validate_word", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ word: word }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.valid) {
+                    // If valid, send the word for submission
+                    fetch("/submit_word", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ word: word }),
+                    })
+                      .then((response) => response.json())
+                      .then((data) => {
+                        const colorArray = data.colors; // Get colors array from response
+                        const defini = data.definition;
+                        const wini = data.winflag;
+
+                        // Apply colors to the boxes in the current row
+                        boxesInCurrentRow.forEach((box, index) => {
+                          box.style.backgroundColor = colorArray[index];
+                          box.style.color = "white"; // Change the text color to white
+                        });
+                        const wordDefinitionElement =
+                          document.getElementById("word-definition");
+                        wordDefinitionElement.textContent = defini;
+                        if (wini) {
+                          setTimeout(() => {
+                            window.location.href = "/win";
+                          }, 800);
+                        }
+                      })
+                      .catch((error) => console.error("Error:", error));
+
+                    // Mark the current row as submitted
+                    submittedRows.add(currentRow);
+
+                    // Move to the next row if it's not the last row
+                    if (currentRow < 5) {
+                      currentRow = Math.min(currentRow + 1, 5);
+                    }
+                  } else {
+                    // If the word is invalid, highlight the row in red
+                    boxesInCurrentRow.forEach((box) => {
+                      box.style.backgroundColor = "#DC0202"; // Temporarily highlight the row in red
+                      setTimeout(() => {
+                        box.style.backgroundColor = ""; // Reset color after 500ms
+                      }, 750);
+                    });
+                  }
+                })
+                .catch((error) => console.error("Error:", error));
+            } else {
+              // If row isn't filled, briefly highlight it in red to indicate an issue
+              boxesInCurrentRow.forEach((box) => {
+                box.style.backgroundColor = "#DC0202";
+                setTimeout(() => {
+                  box.style.backgroundColor = "";
+                }, 750);
+              });
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
